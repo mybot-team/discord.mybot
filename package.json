@@ -1,6 +1,6 @@
 {
   "name": "discord.mybot",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "discord.mybot es un módulo node.js que le permite interactuar con la API de Discord con mucha facilidad.",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/mybot-team/discord.mybot.git"
   },
-  "keywords": [],
+  "keywords": ["discord", "discord.js", "discord api", "api"],
   "author": "MyBOT Team",
   "license": "MIT",
   "bugs": {
