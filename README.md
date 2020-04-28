@@ -1,6 +1,8 @@
 # discord.mybot v0
 > discord.mybot es un módulo node.js que le permite interactuar con la API de Discord con mucha facilidad.
 
+## ¡Se requiere Node.js v12!
+
 # Instalación
 ```
 npm install discord.mybot
