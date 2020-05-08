@@ -4,17 +4,17 @@
     "description": "Módulo de Node.js que permite interactuar con la API de Discord con mucha facilidad",
     "main": "src/index.js",
     "scripts": {
-        "eslint": "eslint src/",
-        "test": "node examples/bot.js"
+        "test": "node example/bot.js"
     },
     "dependencies": {
         "ws": "^7.2.3"
     },
-    "devDependencies": {},
     "repository": {
         "type": "git",
         "url": "git+https://github.com/mybot-team/discord.mybot.git"
     },
+    "author": "MyBOT Team",
+    "license": "MIT",
     "bugs": {
         "url": "https://github.com/mybot-team/discord.mybot/issues"
     },
@@ -26,7 +26,5 @@
         "discord api",
         "bots discord",
         "discord.mybot"
-    ],
-    "author": "MyBOT Team",
-    "license": "MIT"
+    ]
 }
