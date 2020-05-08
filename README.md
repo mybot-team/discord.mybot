@@ -1,22 +1,19 @@
 # discord.mybot v0
-> discord.mybot es un módulo node.js que le permite interactuar con la API de Discord con mucha facilidad.
+discord.mybot es un módulo de Node.js publicado en NPM que le permite interactuar con la API de Discord con mucha facilidad.
 
-## ¡Se requiere Node.js v12!
+**¡Se requiere Node.js v12 o superior!**
 
-# Instalación
-```
-npm install discord.mybot
-```
+## Instalación
+`npm install discord.mybot`
 
-# Ejemplo:
+## Ejemplo:
 ```js
 const Discord = require('discord.mybot');
 const client = new Discord.Client();
 
 // Token bot en: https://discordapp.com/developers/applications
-client.login('BOT_TOKEN')
-
+client.login('BOT_TOKEN');
 ```
 
-> El modulo esta en desarrollo, por ahora solo puedes iniciar tu bot mediante un token
+> Por ahora el módulo está en desarrollo, solo puedes iniciar tu bot mediante un token
 > genial no? :D
