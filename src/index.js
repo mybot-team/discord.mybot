@@ -2,7 +2,7 @@
 const WebSocket = require('ws');
 
 // Discord API v7
-const WEB = 'https://discordapp.com';
+const WEB = 'https://discord.com';
 const API = `${WEB}/api/v7`;
 const CDN = 'https://cdn.discordapp.com';
 
