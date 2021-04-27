@@ -1,12 +1,12 @@
-'use strict';
-const WebSocket = require('ws');
+"use strict";
+const WebSocket = require("ws");
 
 // Discord API v7
-const WEB = 'https://discordapp.com';
+const WEB = "https://discordapp.com";
 const API = `${WEB}/api/v7`;
-const CDN = 'https://cdn.discordapp.com';
+const CDN = "https://cdn.discordapp.com";
 
-const APIRequest = require('./APIRequest.js');
+const APIRequest = require("./APIRequest.js");
 
 const OPCode = {
     DISPATCH: 0,
@@ -19,8 +19,16 @@ const OPCode = {
     HEARTBEAT_ACK: 11,
 };
 
+const red = (msg) => {
+    return `\x1b[31m${msg}\x1b[0m`;
+};
+
+const genError = (msg, description) => {
+    return `${red("error")} ${msg}\n ${description ? "- " + description : ""}`;
+};
+
 // Creado una clase cliente Main
-class Client extends require('events').EventEmitter {
+class Client extends require("events").EventEmitter {
     #token;
     #auth;
     #sessionId;
@@ -29,7 +37,7 @@ class Client extends require('events').EventEmitter {
     #heartbeatTimer;
     #ws;
 
-    #WsConnect = async resume => {
+    #WsConnect = async (resume) => {
         this.#WsDisconnect();
 
         if (!resume) {
@@ -37,45 +45,47 @@ class Client extends require('events').EventEmitter {
             this.#lastSequence = 0;
         }
 
-        this.#ws = new WebSocket(JSON.parse(await APIRequest.APIRequest(`${API}/gateway/bot`, {
-            headers: {
-                Authorization: this.#auth
-            }
-        })).url);
+        this.#ws = new WebSocket(
+            JSON.parse(
+                await APIRequest.APIRequest(`${API}/gateway/bot`, {
+                    headers: {
+                        Authorization: this.#auth,
+                    },
+                })
+            ).url
+        );
 
-        this.#ws.on('message', this.#OnMessage);
-        this.#ws.on('close', this.#OnClose);
-        this.#ws.on('error', this.#OnError);
-    }
+        this.#ws.on("message", this.#OnMessage);
+        this.#ws.on("close", this.#OnClose);
+        this.#ws.on("error", this.#OnError);
+    };
 
     #WsDisconnect = (code = 1012) => {
         if (!this.#ws) return;
 
-        this.emit('disconnect', code);
+        this.emit("disconnect", code);
         this.#ws.removeAllListeners();
         this.#ws.close(code);
         this.#ws = undefined;
-    }
+    };
 
-    #OnMessage = data => {
+    #OnMessage = (data) => {
         const packet = JSON.parse(data);
         if (!packet) return;
 
-        if (packet.s > this.#lastSequence)
-            this.#lastSequence = packet.s;
+        if (packet.s > this.#lastSequence) this.#lastSequence = packet.s;
 
         const op = packet.op;
         if (op == OPCode.DISPATCH) {
             const t = packet.t;
-            if ((t == 'READY') || (t == 'RESUMED')) {
-                if (packet.d.session_id)
-                    this.#sessionId = packet.d.session_id;
+            if (t == "READY" || t == "RESUMED") {
+                if (packet.d.session_id) this.#sessionId = packet.d.session_id;
 
                 this.#lastHeartbeatAck = true;
                 this.#SendHeartbeat();
-                this.emit('connect');
+                this.emit("connect");
             }
-            this.emit('packet', packet);
+            this.emit("packet", packet);
         } else if (op == OPCode.HELLO) {
             this.#Identify();
             this.#lastHeartbeatAck = true;
@@ -85,84 +95,94 @@ class Client extends require('events').EventEmitter {
         } else if (op == OPCode.HEARTBEAT) {
             this.#SendHeartbeat();
         } else if (op == OPCode.INVALID_SESSION) {
-            this.emit('warn', `Sesión inválida. Reanudable: ${packet.d}`);
+            this.emit("warn", `Sesión inválida. Reanudable: ${packet.d}`);
             this.#WsConnect(packet.d);
         } else if (op == OPCode.RECONNECT) {
-            this.emit('warn', 'Reconectando.');
+            this.emit("warn", "Reconectando.");
             this.#WsConnect(true);
         }
-    }
-    
+    };
+
     #Identify = () => {
-        this.#ws.send(JSON.stringify(this.#sessionId ? {
-            op: OPCode.RESUME,
-            d: {
-                token: this.#token,
-                session_id: this.#sessionId,
-                seq: this.#lastSequence,
-            },
-        } : {
-                op: OPCode.IDENTIFY,
-                d: {
-                    token: this.#token,
-                    properties: {
-                        $os: 'linux',
-                        $browser: 'discord.mybot',
-                        $device: 'discord.mybot'
-                    },
-                },
-            }));
-    }
+        this.#ws.send(
+            JSON.stringify(
+                this.#sessionId
+                    ? {
+                            op: OPCode.RESUME,
+                            d: {
+                                token: this.#token,
+                                session_id: this.#sessionId,
+                                seq: this.#lastSequence,
+                            },
+                        }
+                    : {
+                            op: OPCode.IDENTIFY,
+                            d: {
+                                token: this.#token,
+                                properties: {
+                                    $os: "linux",
+                                    $browser: "discord.mybot",
+                                    $device: "discord.mybot",
+                                },
+                            },
+                        }
+            )
+        );
+    };
 
     #SendHeartbeat = () => {
         if (this.#lastHeartbeatAck) {
-            if (this.#ws && (this.#ws.readyState == 1)) {
+            if (this.#ws && this.#ws.readyState == 1) {
                 this.#lastHeartbeatAck = false;
-                this.#ws.send(JSON.stringify({
-                    op: OPCode.HEARTBEAT,
-                    d: this.#lastSequence
-                }));
+                this.#ws.send(
+                    JSON.stringify({
+                        op: OPCode.HEARTBEAT,
+                        d: this.#lastSequence,
+                    })
+                );
             }
         } else {
-            this.emit('warn', 'Tiempo de espera.');
+            this.emit("warn", "Tiempo de espera.");
             this.#WsConnect(true);
         }
-    }
+    };
 
-    #SetHeartbeatTimer = interval => {
+    #SetHeartbeatTimer = (interval) => {
         if (this.#heartbeatTimer) {
             clearInterval(this.#heartbeatTimer);
             this.#heartbeatTimer = undefined;
         }
         if (interval)
             this.#heartbeatTimer = setInterval(this.#SendHeartbeat, interval);
-    }
+    };
 
-    #OnClose = code => {
+    #OnClose = (code) => {
         this.#WsDisconnect(code);
         this.#WsConnect(true);
-    }
+    };
 
-    #OnError = error => this.emit('error', error);
+    #OnError = (error) => this.emit("error", error);
 
-    login = token => {
-        if (!token)
-            throw 'Requiere un token.';
+    login = (token) => {
+        if (!token) throw genError("Requiere un token.");
 
-        if (typeof (token) == 'string') {
+        if (token === "BOT_TOKEN")
+            throw genError(
+                "Token invalido",
+                'En la función no debes escribir literalmente "BOT_TOKEN", sino el token de tu bot. Este, lo puedes conseguir en https://discordapp.com/developers/applications'
+            );
+
+        if (typeof token == "string") {
             this.#token = token;
-            this.#auth = `Bot ${token}`
+            this.#auth = `Bot ${token}`;
             this.#Connect();
-        }
-        else throw 'El token debe ser un texto.';
-    }
+        } else throw genError("El token debe ser un texto.");
+    };
 
-    #Connect = resume => {
-        if (this.#token)
-            this.#WsConnect(resume);
-        else
-            throw 'Requiere una autorización.';
-    }
+    #Connect = (resume) => {
+        if (this.#token) this.#WsConnect(resume);
+        else throw genError("Requiere una autorización.");
+    };
 }
 
 //Permisos
@@ -201,5 +221,5 @@ const Permissions = {
 
 module.exports = {
     Client,
-    Permissions
+    Permissions,
 };
