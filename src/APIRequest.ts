@@ -1,18 +1,18 @@
-const https = require('https');
+import https from 'https';
 
-exports.APIRequest = (url, options, data = null) => {
+const APIRequest = (url: string, options: Object, data: any = null) => {
     if (data && !((typeof (data) == 'string') || (data instanceof Buffer)))
         throw 'Los datos deben ser una cadena o un búfer.';
 
     return new Promise((resolve, reject) => {
         const request = https.request(url, options, resp => {
-            const DataResult = (result = null) => ((resp.statusCode >= 200) && (resp.statusCode < 300)) ? resolve(result) : reject({
+            const DataResult = (result = null) => ((resp?.statusCode >= 200) && (resp.statusCode < 300)) ? resolve(result) : reject({
                 code: resp.statusCode,
                 ext: resp.statusMessage,
                 data: result
             });
 
-            const amount = [];
+            const amount: any[] = [];
             let dataLength = 0;
 
             resp.on('data', data => {
@@ -33,9 +33,10 @@ exports.APIRequest = (url, options, data = null) => {
                 const data = Buffer.allocUnsafe(dataLength);
                 let len = 0;
                 for (let index = 0; index < amount.length; index++) {
-                    const amount = amount[index];
-                    amount.copy(data, len);
-                    len += amount.length;
+                    const preAmount = amount[index];
+                    const _amount = preAmount;
+                    _amount.copy(data, len);
+                    len += _amount.length;
                 }
                 return DataResult(data);
             });
@@ -46,3 +47,5 @@ exports.APIRequest = (url, options, data = null) => {
         request.end(data);
     });
 }
+
+export default { APIRequest }
