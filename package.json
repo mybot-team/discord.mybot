@@ -2,12 +2,21 @@
     "name": "discord.mybot",
     "version": "0.0.1",
     "description": "Módulo de Node.js que permite interactuar con la API de Discord con mucha facilidad",
-    "main": "src/index.js",
+    "main": "dist/index.js",
     "scripts": {
-        "test": "node example/bot.js"
+        "test": "node example/bot.js",
+        "build:ts": "npx tsc -d",
+        "postbuild": "node scripts/postbuild.js",
+        "build": "npm run build:ts",
+        "clean-src": "rm -r src/*.js src/*.d.ts"
     },
     "dependencies": {
+        "@types/node": "^15.0.1",
+        "@types/ws": "^7.4.2",
         "ws": "^7.2.3"
+    },
+    "devDependencies": {
+        "typescript": "^4.2.4"
     },
     "repository": {
         "type": "git",

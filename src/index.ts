@@ -1,13 +1,20 @@
 "use strict";
-const WebSocket = require("ws");
+import WebSocket from "ws";
+import EventEmitter from "events";
+
+export * from '../typings';
 
 // Discord API v7
 const WEB = "https://discordapp.com";
 const API = `${WEB}/api/v7`;
 const CDN = "https://cdn.discordapp.com";
 
-const APIRequest = require("./APIRequest.js");
+import APIRequest from "./APIRequest";
+import { PermissionsType } from "../typings";
 
+/** 
+ * Opcode
+ */
 const OPCode = {
     DISPATCH: 0,
     HEARTBEAT: 1,
@@ -19,25 +26,53 @@ const OPCode = {
     HEARTBEAT_ACK: 11,
 };
 
-const red = (msg) => {
+/** 
+ * red - Devuelve el texto introducido pero de color rojo
+ * @param {String} msg El texto a pasar a rojo
+ * @returns {String} El texto pero de color rojo
+ */
+const red = (msg: string): string => {
     return `\x1b[31m${msg}\x1b[0m`;
 };
 
-const genError = (msg, description) => {
+/** 
+ * Genera un error con buena legibilidad
+ * @param {String} msg El mensaje del error
+ * @param {String} description OPCIONAL: descripción del error
+ * @returns {String} El error generado
+ */
+const genError = (msg: string, description: string = ""): string => {
+    if (!msg) {
+        console.error("Mal uso de \`genError\`: falta un parametro obligatorio (`msg`)");
+        return "";
+    };
     return `${red("error")} ${msg}\n ${description ? "- " + description : ""}`;
 };
 
-// Creado una clase cliente Main
-class Client extends require("events").EventEmitter {
-    #token;
-    #auth;
-    #sessionId;
-    #lastSequence;
-    #lastHeartbeatAck;
-    #heartbeatTimer;
-    #ws;
+/** 
+ * El cliente principal
+ * @extends EventEmitter
+ */
+class Client extends EventEmitter {
+    /** 
+     * El ! en las vars sirve para evitar el siguiente error:
+     * - "Property 'x' has no initializer and is not definitely assigned"
+     * [Más info](https://tutorial.tips/3-ways-to-fix-property-has-no-initializer-and-is-not-definitely-assigned-in-the-constructorts/)
+     */
 
-    #WsConnect = async (resume) => {
+    /***/
+    #token!: string;
+    #auth!: any;
+    #sessionId!: any;
+    #lastSequence!: any;
+    #lastHeartbeatAck!: any;
+    #heartbeatTimer!: any;
+    #ws!: any;
+
+    /** 
+     * Conectarse al WebSocket
+     */
+    #WsConnect = async (resume: any) => {
         this.#WsDisconnect();
 
         if (!resume) {
@@ -45,13 +80,15 @@ class Client extends require("events").EventEmitter {
             this.#lastSequence = 0;
         }
 
+        const tmbApRew: string = APIRequest.APIRequest(`${API}/gateway/bot`, {
+            headers: {
+                Authorization: this.#auth,
+            },
+        }).toString();
+        
         this.#ws = new WebSocket(
             JSON.parse(
-                await APIRequest.APIRequest(`${API}/gateway/bot`, {
-                    headers: {
-                        Authorization: this.#auth,
-                    },
-                })
+                tmbApRew
             ).url
         );
 
@@ -60,6 +97,9 @@ class Client extends require("events").EventEmitter {
         this.#ws.on("error", this.#OnError);
     };
 
+    /** 
+     * Desconectarse al WebSocket
+     */
     #WsDisconnect = (code = 1012) => {
         if (!this.#ws) return;
 
@@ -69,7 +109,11 @@ class Client extends require("events").EventEmitter {
         this.#ws = undefined;
     };
 
-    #OnMessage = (data) => {
+    /** 
+     * Evento message
+     */
+    #OnMessage = (data: string) => {
+        if (!data) return;
         const packet = JSON.parse(data);
         if (!packet) return;
 
@@ -103,6 +147,9 @@ class Client extends require("events").EventEmitter {
         }
     };
 
+    /** 
+     * Verificar identidad
+     */
     #Identify = () => {
         this.#ws.send(
             JSON.stringify(
@@ -130,6 +177,9 @@ class Client extends require("events").EventEmitter {
         );
     };
 
+    /** 
+     * Mandar HeartBeat
+     */
     #SendHeartbeat = () => {
         if (this.#lastHeartbeatAck) {
             if (this.#ws && this.#ws.readyState == 1) {
@@ -147,7 +197,10 @@ class Client extends require("events").EventEmitter {
         }
     };
 
-    #SetHeartbeatTimer = (interval) => {
+    /** 
+     * Empezar tiper
+     */
+    #SetHeartbeatTimer = (interval: number) => {
         if (this.#heartbeatTimer) {
             clearInterval(this.#heartbeatTimer);
             this.#heartbeatTimer = undefined;
@@ -156,14 +209,24 @@ class Client extends require("events").EventEmitter {
             this.#heartbeatTimer = setInterval(this.#SendHeartbeat, interval);
     };
 
-    #OnClose = (code) => {
+    /** 
+     * Evento de cierre
+     */
+    #OnClose = (code: number) => {
         this.#WsDisconnect(code);
         this.#WsConnect(true);
     };
 
-    #OnError = (error) => this.emit("error", error);
+    /** 
+     * Evento de error
+     */
+    #OnError = (error: any) => this.emit("error", error);
 
-    login = (token) => {
+    /**
+     * Login del bot
+     * @param {String} token El token del bot (lo puedes conseguir [aqui](https://discordapp.com/developers/applications))
+     */
+    login = (token: string) => {
         if (!token) throw genError("Requiere un token.");
 
         if (token === "BOT_TOKEN")
@@ -179,14 +242,19 @@ class Client extends require("events").EventEmitter {
         } else throw genError("El token debe ser un texto.");
     };
 
-    #Connect = (resume) => {
+    /** 
+     * Conectarse con autorización
+    */
+    #Connect = (resume?: any) => {
         if (this.#token) this.#WsConnect(resume);
         else throw genError("Requiere una autorización.");
     };
 }
 
-//Permisos
-const Permissions = {
+/**
+ * Permisos
+ */
+const Permissions: PermissionsType = {
     CREATE_INSTANT_INVITE: 0x1,
     KICK_MEMBERS: 0x2,
     BAN_MEMBERS: 0x4,
@@ -219,7 +287,7 @@ const Permissions = {
     MANAGE_EMOJIS: 0x40000000,
 };
 
-module.exports = {
+export default {
     Client,
     Permissions,
 };
