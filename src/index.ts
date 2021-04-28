@@ -62,7 +62,7 @@ class Client extends EventEmitter {
     /** 
      * Conectarse al WebSocket
      */
-    #WsConnect = async (resume) => {
+    #WsConnect = async (resume: any) => {
         this.#WsDisconnect();
 
         if (!resume) {
@@ -70,7 +70,7 @@ class Client extends EventEmitter {
             this.#lastSequence = 0;
         }
 
-        const tmbApRew: string = await APIRequest.APIRequest(`${API}/gateway/bot`, {
+        const tmbApRew: string = APIRequest.APIRequest(`${API}/gateway/bot`, {
             headers: {
                 Authorization: this.#auth,
             },
@@ -102,7 +102,7 @@ class Client extends EventEmitter {
     /** 
      * Evento message
      */
-    #OnMessage = (data) => {
+    #OnMessage = (data: string) => {
         if (!data) return;
         const packet = JSON.parse(data);
         if (!packet) return;
@@ -190,7 +190,7 @@ class Client extends EventEmitter {
     /** 
      * Empezar tiper
      */
-    #SetHeartbeatTimer = (interval) => {
+    #SetHeartbeatTimer = (interval: number) => {
         if (this.#heartbeatTimer) {
             clearInterval(this.#heartbeatTimer);
             this.#heartbeatTimer = undefined;
@@ -202,7 +202,7 @@ class Client extends EventEmitter {
     /** 
      * Evento de cierre
      */
-    #OnClose = (code) => {
+    #OnClose = (code: number) => {
         this.#WsDisconnect(code);
         this.#WsConnect(true);
     };
@@ -210,7 +210,7 @@ class Client extends EventEmitter {
     /** 
      * Evento de error
      */
-    #OnError = (error) => this.emit("error", error);
+    #OnError = (error: any) => this.emit("error", error);
 
     /**
      * Login del bot

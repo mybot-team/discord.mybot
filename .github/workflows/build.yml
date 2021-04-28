@@ -7,10 +7,10 @@ on:
     branches: [master]
 
 jobs:
-  rust-format:
+  buildts:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
       - name: Build typescript
-        run: npm run build
+        run: npm install && npm run build
