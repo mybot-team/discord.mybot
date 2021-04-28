@@ -2,12 +2,15 @@
 import WebSocket from "ws";
 import EventEmitter from "events";
 
+export * from '../typings';
+
 // Discord API v7
 const WEB = "https://discordapp.com";
 const API = `${WEB}/api/v7`;
 const CDN = "https://cdn.discordapp.com";
 
 import APIRequest from "./APIRequest";
+import { PermissionsType } from "../typings";
 
 /** 
  * Opcode
@@ -51,13 +54,20 @@ const genError = (msg: string, description: string = ""): string => {
  * @extends EventEmitter
  */
 class Client extends EventEmitter {
-    #token;
-    #auth;
-    #sessionId;
-    #lastSequence;
-    #lastHeartbeatAck;
-    #heartbeatTimer;
-    #ws;
+    /** 
+     * El ! en las vars sirve para evitar el siguiente error:
+     * - "Property 'x' has no initializer and is not definitely assigned"
+     * [Más info](https://tutorial.tips/3-ways-to-fix-property-has-no-initializer-and-is-not-definitely-assigned-in-the-constructorts/)
+     */
+
+    /***/
+    #token!: string;
+    #auth!: any;
+    #sessionId!: any;
+    #lastSequence!: any;
+    #lastHeartbeatAck!: any;
+    #heartbeatTimer!: any;
+    #ws!: any;
 
     /** 
      * Conectarse al WebSocket
@@ -244,7 +254,7 @@ class Client extends EventEmitter {
 /**
  * Permisos
  */
-const Permissions = {
+const Permissions: PermissionsType = {
     CREATE_INSTANT_INVITE: 0x1,
     KICK_MEMBERS: 0x2,
     BAN_MEMBERS: 0x4,

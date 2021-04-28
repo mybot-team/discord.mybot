@@ -6,6 +6,7 @@
     "scripts": {
         "test": "node example/bot.js",
         "build:ts": "npx tsc -d",
+        "postbuild": "node scripts/postbuild.js",
         "build": "npm run build:ts",
         "clean-src": "rm -r src/*.js src/*.d.ts"
     },

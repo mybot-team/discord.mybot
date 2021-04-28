@@ -6,7 +6,7 @@ const APIRequest = (url: string, options: Object, data: any = null) => {
 
     return new Promise((resolve, reject) => {
         const request = https.request(url, options, resp => {
-            const DataResult = (result = null) => ((resp?.statusCode >= 200) && (resp.statusCode < 300)) ? resolve(result) : reject({
+            const DataResult = (result: any = null) => (resp && resp.statusCode && ((resp?.statusCode >= 200) && (resp.statusCode < 300))) ? resolve(result) : reject({
                 code: resp.statusCode,
                 ext: resp.statusMessage,
                 data: result
