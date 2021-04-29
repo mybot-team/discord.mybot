@@ -1,6 +1,6 @@
 # discord.mybot v0
 
-![typescript build](https://github.com/mybot-team/discord.mybot/actions/workflows/build.yaml/badge.svg)
+![typescript build](https://github.com/mybot-team/discord.mybot/actions/workflows/build.yml/badge.svg)
 
 discord.mybot es un módulo de Node.js publicado en NPM que le permite interactuar con la API de Discord con mucha facilidad.
 
