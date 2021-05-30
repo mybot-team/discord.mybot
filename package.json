@@ -13,7 +13,7 @@
     "dependencies": {
         "@types/node": "^15.0.1",
         "@types/ws": "^7.4.2",
-        "ws": "^7.2.3"
+        "ws": "^7.4.6"
     },
     "devDependencies": {
         "typescript": "^4.2.4"
